@@ -1,0 +1,14 @@
+export interface User {
+  id: number
+  name?: string
+  email: string
+  isSeller: boolean
+}
+
+export interface Product {
+  id: number
+  title: string
+  description?: string
+  price: number
+  image?: string
+}
