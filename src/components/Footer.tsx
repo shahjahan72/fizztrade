@@ -22,7 +22,7 @@ export default function Footer() {
                         <ul className="space-y-3">
                             {['Home', 'About Us', 'Services', 'Pricing', 'Blog'].map((item) => (
                                 <li key={item}>
-                                    <Link href={`/${item.toLowerCase().replace(' ', '-')}`} className="text-gray-600 hover:text-primary transition-colors">
+                                    <Link href={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`} className="text-gray-600 hover:text-primary transition-colors">
                                         {item}
                                     </Link>
                                 </li>
@@ -43,7 +43,7 @@ export default function Footer() {
                                 'Physical Branding'
                             ].map((item) => (
                                 <li key={item}>
-                                    <Link href="#" className="text-gray-600 hover:text-primary transition-colors">
+                                    <Link href="/services" className="text-gray-600 hover:text-primary transition-colors">
                                         {item}
                                     </Link>
                                 </li>

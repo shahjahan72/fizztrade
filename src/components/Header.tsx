@@ -26,7 +26,7 @@ export default function Header() {
                         {['Home', 'About Us', 'Services', 'Pricing', 'Blog', 'Contact Us'].map((item) => (
                             <Link
                                 key={item}
-                                href={`/${item.toLowerCase().replace(' ', '-')}`}
+                                href={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`}
                                 className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
                             >
                                 {item}
@@ -82,7 +82,7 @@ export default function Header() {
                             {['Home', 'About Us', 'Services', 'Pricing', 'Blog', 'Contact Us'].map((item) => (
                                 <Link
                                     key={item}
-                                    href={`/${item.toLowerCase().replace(' ', '-')}`}
+                                    href={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '-')}`}
                                     className="px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary rounded-lg font-medium transition-colors"
                                     onClick={() => setIsMenuOpen(false)}
                                 >

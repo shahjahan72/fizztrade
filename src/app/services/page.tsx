@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, Palette, Globe, Scale, MessageCircle, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronUp, Palette, Globe, Scale, MessageCircle, ArrowRight, Users, Store, MapPin } from "lucide-react";
 
 type ServiceItem = {
     id: string;
@@ -51,6 +51,44 @@ const services: ServiceItem[] = [
             "Legal Contract Drafting"
         ]
     }
+    },
+{
+    id: "buyer",
+        title: "Buyer Matching",
+            icon: <Users className="w-6 h-6" />,
+                description: "Connect with verified buyers worldwide. We use data-driven matching to find the perfect partners for your products.",
+                    benefits: [
+                        "Verified Buyer Database Access",
+                        "B2B Matchmaking Events",
+                        "Lead Generation & Qualification",
+                        "Trade Facilitation"
+                    ]
+},
+{
+    id: "store",
+        title: "Online Stores",
+            icon: <Store className="w-6 h-6" />,
+                priceStart: "$149",
+                    description: "Launch your own branded e-commerce store on the FizzTrade platform. Includes hosting, payment gateway integration, and inventory management.",
+                        benefits: [
+                            "Custom Domain & Storefront",
+                            "Integrated Local Payment Gateways",
+                            "Inventory & Order Management Dashboard",
+                            "Mobile-Optimized Design"
+                        ]
+},
+{
+    id: "physical",
+        title: "Physical Branding",
+            icon: <MapPin className="w-6 h-6" />,
+                description: "Extend your brand to the physical world. We design and produce high-quality marketing materials and office branding.",
+                    benefits: [
+                        "Office Signage & Wall Graphics",
+                        "Business Cards, Flyers & Brochures",
+                        "Event Booth Design",
+                        "Vehicle Wraps & Outdoor Advertising"
+                    ]
+}
 ];
 
 export default function ServicesPage() {
