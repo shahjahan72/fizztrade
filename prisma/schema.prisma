@@ -71,6 +71,7 @@ model User {
   sessions      Session[]
   orders        Order[]
   serviceRequests ServiceRequest[]
+  assignedRequests ServiceRequest[] @relation("AssignedRequests")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -89,6 +90,7 @@ model Product {
   reviews     Int?           @default(0)
   status      ProductStatus  @default(DRAFT)
   tags        String[]       @default([])
+  orderItems  OrderItem[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

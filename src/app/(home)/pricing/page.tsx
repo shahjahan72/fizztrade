@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Check, X, ArrowRight } from 'lucide-react';
+import { Check, X, ArrowRight, ChevronDown } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Pricing | FizzTrade',

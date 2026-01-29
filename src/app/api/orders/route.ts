@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         buyer: { select: { id: true, name: true, email: true } },
-        items: { include: { product: { select: { id: true, title: true, price: true, image: true } } } },
+        items: { include: { product: { select: { id: true, title: true, price: true, images: true } } } },
       },
     });
 
