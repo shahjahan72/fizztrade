@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongoose';
-import User from '@/models/User';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to database
-    await connectDB();
-
-    // Parse request body
     const { email, password } = await request.json();
 
     // Validation
@@ -18,8 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user with password (select is false by default for passwordHash)
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+passwordHash');
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 
     if (!user) {
       return NextResponse.json(
@@ -28,8 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Compare passwords
-    const isPasswordCorrect = await user.comparePassword(password);
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
       return NextResponse.json(
@@ -40,20 +34,18 @@ export async function POST(request: NextRequest) {
 
     // Return user data without password
     const userResponse = {
-      _id: user._id,
+      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
-      isVerified: user.isVerified,
+      createdAt: user.createdAt,
     };
 
-    // In a real app, you would create a JWT token here
     return NextResponse.json(
       {
         success: true,
         message: 'Login successful',
         user: userResponse,
-        // token: generateToken(user._id), // Generate JWT token
       },
       { status: 200 }
     );
@@ -66,3 +58,10 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    { success: false, message: 'Method not allowed' },
+    { status: 405 }
+  );
+} 

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongoose';
-import User, { UserRole } from '@/models/User';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to database
-    await connectDB();
-
-    // Parse request body
     const { name, email, password, confirmPassword, role } = await request.json();
 
     // Validation
@@ -32,17 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate role
-    const validRole = Object.values(UserRole).includes(role as UserRole);
-    if (!validRole) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid role provided' },
-        { status: 400 }
-      );
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'Email already registered' },
@@ -50,25 +36,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new user
-    const newUser = new User({
-      name: name.trim(),
-      email: email.toLowerCase(),
-      passwordHash: password,
-      role: role || UserRole.BUYER,
-      isVerified: false,
+    const hashed = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: email.toLowerCase(),
+        password: hashed,
+        role: role ?? 'BUYER',
+      },
     });
 
-    // Save user (password will be hashed by middleware)
-    await newUser.save();
-
-    // Return user data without password
     const userResponse = {
-      _id: newUser._id,
+      id: newUser.id,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
-      isVerified: newUser.isVerified,
       createdAt: newUser.createdAt,
     };
 
@@ -83,19 +66,8 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Registration error:', error);
 
-    // Handle MongoDB validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors)
-        .map((err: any) => err.message)
-        .join(', ');
-      return NextResponse.json(
-        { success: false, message: messages },
-        { status: 400 }
-      );
-    }
-
-    // Handle MongoDB duplicate key error
-    if (error.code === 11000) {
+    // Prisma unique constraint error
+    if (error.code === 'P2002') {
       return NextResponse.json(
         { success: false, message: 'Email already registered' },
         { status: 409 }
@@ -114,4 +86,4 @@ export async function GET(request: NextRequest) {
     { success: false, message: 'Method not allowed' },
     { status: 405 }
   );
-}
+} 

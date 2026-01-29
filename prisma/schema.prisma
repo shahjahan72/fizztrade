@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Agar MongoDB use kar rahe hain to "mongodb" likhein
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -14,26 +14,175 @@ enum Role {
   SERVICE_SEEKER
 }
 
+enum ProductCategory {
+  ELECTRONICS
+  FASHION
+  HOME
+  SPORTS
+  BOOKS
+  BEAUTY
+  TOYS
+  OTHER
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum ServiceType {
+  BRANDING
+  PRODUCT_SOURCING
+  LEGAL_REGISTRATION
+  BUYER_MATCHING
+  ONLINE_STORE
+  PHYSICAL_BRANDING
+}
+
+enum RequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
+  emailVerified DateTime?
   password      String
   role          Role      @default(BUYER)
   image         String?
   products      Product[]
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  serviceRequests ServiceRequest[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String
   price       Float
-  image       String?
-  category    String
+  images      String[]
+  category    ProductCategory
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  user        User           @relation(fields: [userId], references: [id])
+  stock       Int            @default(0)
+  rating      Float?         @default(0)
+  reviews     Int?           @default(0)
+  status      ProductStatus  @default(DRAFT)
+  tags        String[]       @default([])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId, status])
+  @@index([category])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  buyerId      String
+  buyer        User        @relation(fields: [buyerId], references: [id])
+  items        OrderItem[]
+  totalAmount  Float
+  status       OrderStatus @default(PENDING)
+  shippingAddress Json?
+  trackingNumber String?
+  paymentStatus String?
+  paymentMethod String?
+  notes        String?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
+  cancelledAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([buyerId, status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+  subtotal  Float
+}
+
+model ServiceRequest {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  serviceType  ServiceType
+  status       RequestStatus @default(PENDING)
+  title        String
+  description  String
+  details      Json?
+  attachments  String[]      @default([])
+  assignedToId String?
+  assignedTo   User?         @relation("AssignedRequests", fields: [assignedToId], references: [id])
+  estimatedCost Float?
+  actualCost   Float?
+  notes        String?
+  completedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([userId, status])
+  @@index([serviceType])
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
